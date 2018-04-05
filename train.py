@@ -1,14 +1,26 @@
 import keras
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D
 from keras.losses import categorical_crossentropy
 from keras.optimizers import RMSprop
 from keras import regularizers
+from logger import Logger
 
-import os
-from data_utils import load_gen
+import os, argparse
+from data_utils import load_gen, validation_split
 
 INPUT_SHAPE = (320,480,3)
+
+def get_arguments():
+	parser = argparse.ArgumentParser(description='Necessary variables.')
+	parser.add_argument('--basepath', type=str, default=1, help = 'path to the dataset directory')
+	parser.add_argument('--pretrained', type=int, default=1, help = 'Load pretrained model or not(1/0)')
+	parser.add_argument('--batchsize', type=int, default=10, help = 'number of sample per batch')
+	parser.add_argument('--modelfile', type=str, default="my-model.h5", help = 'path to be given when pretrained is set to 1')
+	parser.add_argument('--lr', type=float, default=1e-4, help = 'learning_rate')
+	parser.add_argument('--savedir', type=str, help = 'where the model is saved')
+	parser.add_argument('--epoch', type=int, default=5, help = 'number of epochs')
+	return parser.parse_args()
 
 def seg_model(n_classes):
 	model = Sequential()
@@ -49,18 +61,48 @@ def seg_model(n_classes):
 
 
 if __name__ == '__main__':
-	base_path = '/home/brijml/Desktop/CrackForest-dataset-master'
+	args = get_arguments()
+	base_path = args.basepath 
 	image_path = os.path.join(base_path, 'image')
 	gt_path = os.path.join(base_path, 'groundTruth')
-	model = seg_model(2)
-	optimizer = RMSprop(lr=1e-3)
-	model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-	model_save_dir = 'parameters/my-model.h5'
+	gt_files = os.listdir(gt_path)
+	train_gt, val_gt = validation_split(gt_files, 0.2)
+	print("training on {} samples, validating on {} samples".format(len(train_gt), len(val_gt))) 
 
-	while True:
-		gen_object = load_gen(image_path, gt_path, 10, 2)
-		for batch_train in gen_object:
+	save_dir = args.savedir
+	epoch = args.epoch
+	batch_obj = Logger('batch','batch.log','info')
+	logger_batch = batch_obj.log()
+
+	if args.pretrained == 0:
+		model = seg_model(2)
+		optimizer = RMSprop(lr=args.lr)
+		model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+	else:
+		model = load_model(args.modelfile)
+
+	epoch_count = 0
+	while epoch_count < epoch:
+		#perform training
+		batch_count = 0
+		train_gen_object = load_gen(image_path, gt_path, train_gt, args.batchsize, 2)
+		for batch_train in train_gen_object:
 			x,y = batch_train
 			loss, accuracy = model.train_on_batch(x,y)
-			print('loss:',loss,'accuracy:',accuracy)
-		model.save(filepath)
+			logger_batch.info('training loss for epoch_no {} batch_number {} is loss:{}, accuracy:{}'.format(epoch_count, batch_count, loss, accuracy))
+			batch_count+=1
+
+		#perform validation
+		batch_count,total_loss = 0,0
+		val_gen_object = load_gen(image_path, gt_path, val_gt, args.batchsize, 2)
+		for batch_val in val_gen_object:
+			x,y = batch_val
+			loss, accuracy = model.test_on_batch(x,y)
+			batch_count+=1
+			total_loss+=loss
+		logger_batch.info('validation loss for epoch_no {} is loss:{}, accuracy:{}'.format(epoch_count, loss, accuracy))
+
+
+		filename = 'mymodel'+str(epoch_count)+'.h5'
+		model.save(os.path.join(save_dir, filename))
+		epoch_count+=1

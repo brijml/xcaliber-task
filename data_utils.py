@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.io as sio
 import os
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from random import shuffle
@@ -21,9 +23,15 @@ def rand_shuffle(files):
 
 	return files
 
-def load_gen(image_path, gt_path, batch_size, n_classes):
+def validation_split(gt_files, ratio):
+	no_train = int(len(gt_files)*(1-ratio))
+	train_gt = gt_files[0:no_train]
+	val_gt = gt_files[no_train:]
+	return train_gt, val_gt
+
+def load_gen(image_path, gt_path, gt_files, batch_size, n_classes):
 	image_files = os.listdir(image_path)
-	gt_files = os.listdir(gt_path)
+	# gt_files = os.listdir(gt_path)
 	gt_files = rand_shuffle(gt_files)
 	for i in range(0,len(gt_files),batch_size):
 		gt_files_batch = gt_files[i:i+batch_size] 
