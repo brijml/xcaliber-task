@@ -29,6 +29,16 @@ def validation_split(gt_files, ratio):
 	val_gt = gt_files[no_train:]
 	return train_gt, val_gt
 
+def get_test_files(image_path, gt_path):
+	test_files = []
+	image_files = os.listdir(image_path)
+	gt_files = os.listdir(gt_path)
+	for i, file_ in enumerate(image_files):
+		if file_ not in gt_files:
+			test_files.append(file_)
+
+	return test_files
+
 def load_gen(image_path, gt_path, gt_files, batch_size, n_classes):
 	image_files = os.listdir(image_path)
 	# gt_files = os.listdir(gt_path)
@@ -41,8 +51,6 @@ def load_gen(image_path, gt_path, gt_files, batch_size, n_classes):
 			img = mpimg.imread(os.path.join(image_path, image_file))
 			mat_contents = sio.loadmat(os.path.join(gt_path, gt_file))
 			seg_mask = mat_contents['groundTruth'][0][0][0]
-			# seg_mat_shape = seg_mat.shape
-			# seg_mask = np.zeros((seg_mat_shape[0], seg_mat_shape[1], n_classes), dtype=np.uint8)
 			seg_mask[seg_mask == 1] = 0
 			seg_mask[seg_mask > 1] = 1
 			images.append(img)
