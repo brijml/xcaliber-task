@@ -2,7 +2,7 @@ from keras.models import load_model
 from data_utils import *
 import os, argparse
 import matplotlib
-matplotlib.use("Agg")
+# matplotlib.use("Agg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
@@ -34,5 +34,9 @@ if __name__ == '__main__':
 				out_channels[:,:,i] = out
 
 			save_image = np.hstack([img, out_channels])
-			plt.imshow(save_image)
-			plt.savefig(os.path.join(args.saveprediction, image_file))
+			show(img)
+			show(prediction[0][:,:,0])
+			show(prediction[0][:,:,1])
+			show(out)
+			# plt.imshow(save_image)
+			# plt.savefig(os.path.join(args.saveprediction, image_file))
