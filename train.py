@@ -34,15 +34,15 @@ def seg_model(n_classes):
 		strides=(1, 1), padding='same',
 		use_bias=True, activation='relu',
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
 	model.add(Conv2D(64, (3,3),
 		strides=(1, 1), padding='same',
 		use_bias=True, activation='relu',
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
-
 	#Convolutional Transposes
 	model.add(Conv2DTranspose(64, (3,3),
-		strides=(1, 1), padding='same',
+		strides=(2, 2), padding='same',
 		use_bias=True, activation='relu',
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	model.add(Conv2DTranspose(32, (3,3),
