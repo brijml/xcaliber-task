@@ -18,19 +18,21 @@ if __name__ == '__main__':
 	base_path = args.basepath 
 	image_path = os.path.join(base_path, 'image')
 	gt_path = os.path.join(base_path, 'groundTruth')
+	image_files = os.listdir(image_path)
 	test_images = get_test_files(image_path, gt_path)
 	model = load_model(args.modelfile)
 
-	for image_file in test_images:
-		img = mpimg.imread(os.path.join(image_path, image_file))
-		img_expanded = np.expand_dims(img, axis=0)
-		prediction = model.predict_on_batch(img_expanded)
-		out = np.argmax(prediction[0], axis=2)
-		m,n = out.shape
-		out_channels = np.zeros((m,n,3), np.uint8)
-		for i in range(3):
-			out_channels[:,:,i] = out
+	for image_file in image_files:
+		if image_file.endswith('.jpg'):
+			img = mpimg.imread(os.path.join(image_path, image_file))
+			img_expanded = np.expand_dims(img, axis=0)
+			prediction = model.predict_on_batch(img_expanded)
+			out = np.argmax(prediction[0], axis=2)
+			m,n = out.shape
+			out_channels = np.zeros((m,n,3), np.uint8)
+			for i in range(3):
+				out_channels[:,:,i] = out
 
-		save_image = np.hstack([img, out_channels])
-		plt.imshow(save_image)
-		plt.savefig(os.path.join(args.saveprediction, image_file))
+			save_image = np.hstack([img, out_channels])
+			plt.imshow(save_image)
+			plt.savefig(os.path.join(args.saveprediction, image_file))

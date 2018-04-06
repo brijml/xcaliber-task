@@ -2,7 +2,7 @@ import keras
 from keras.models import Sequential, load_model
 from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D
 from keras.losses import categorical_crossentropy
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, SGD
 from keras import regularizers
 from logger import Logger
 
@@ -40,6 +40,7 @@ def seg_model(n_classes):
 		use_bias=True, activation='relu',
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
+
 	#Convolutional Transposes
 	model.add(Conv2DTranspose(64, (3,3),
 		strides=(2, 2), padding='same',
@@ -76,7 +77,8 @@ if __name__ == '__main__':
 
 	if args.pretrained == 0:
 		model = seg_model(2)
-		optimizer = RMSprop(lr=args.lr)
+		# optimizer = RMSprop(lr=args.lr)
+		sgd = optimizers.SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=False)
 		model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 	else:
 		model = load_model(args.modelfile)
@@ -100,7 +102,7 @@ if __name__ == '__main__':
 			loss, accuracy = model.test_on_batch(x,y)
 			batch_count+=1
 			total_loss+=loss
-		logger_batch.info('validation loss for epoch_no {} is loss:{}, accuracy:{}'.format(epoch_count, loss, accuracy))
+		logger_batch.info('validation loss for epoch_no {} is loss:{}, accuracy:{}'.format(epoch_count, (total_loss/batch_count), accuracy))
 
 
 		filename = 'mymodel'+str(epoch_count)+'.h5'

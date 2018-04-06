@@ -33,8 +33,9 @@ def get_test_files(image_path, gt_path):
 	test_files = []
 	image_files = os.listdir(image_path)
 	gt_files = os.listdir(gt_path)
+	gt_mod = [i.split('.')[0] for i in gt_files]
 	for i, file_ in enumerate(image_files):
-		if file_ not in gt_files:
+		if file_.split('.')[0] not in gt_mod:
 			test_files.append(file_)
 
 	return test_files
@@ -63,10 +64,12 @@ if __name__ == '__main__':
 	base_path = '/home/brijml/Desktop/CrackForest-dataset-master'
 	image_path = os.path.join(base_path, 'image')
 	gt_path = os.path.join(base_path, 'groundTruth')
-	gen_object = load_gen(image_path, gt_path, 10, 2)
+	gt_files = os.listdir(gt_path)
+	gen_object = load_gen(image_path, gt_path, gt_files, 10, 2)
 	for batch_train in gen_object:
 		images = batch_train[0]
 		labels = batch_train[1]
 		for i,image in enumerate(images):
 			show(image)
-			show(labels[i])
+			show(labels[i][:,:,0])
+			show(labels[i][:,:,1])
