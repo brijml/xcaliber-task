@@ -15,7 +15,7 @@ def get_arguments():
 	parser = argparse.ArgumentParser(description='Necessary variables.')
 	parser.add_argument('--basepath', type=str, default=1, help = 'path to the dataset directory')
 	parser.add_argument('--pretrained', type=int, default=1, help = 'Load pretrained model or not(1/0)')
-	parser.add_argument('--batchsize', type=int, default=10, help = 'number of sample per batch')
+	parser.add_argument('--optimizer', type=str, default='rms', help = 'which optimizer is to be used')
 	parser.add_argument('--modelfile', type=str, default="my-model.h5", help = 'path to be given when pretrained is set to 1')
 	parser.add_argument('--lr', type=float, default=1e-4, help = 'learning_rate')
 	parser.add_argument('--savedir', type=str, help = 'where the model is saved')
@@ -45,24 +45,6 @@ def seg_model(n_classes):
 		use_bias=True, activation='relu',
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
-
-	# #Convolutional Transposes
-	# model.add(Conv2DTranspose(64, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(32, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(16, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(n_classes, (3,3),
-	# 	strides=(1, 1), padding='same',
-	# 	use_bias=True, activation='softmax',
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	
 	#Fully connected layers
 	model.add(Flatten())
@@ -89,8 +71,10 @@ if __name__ == '__main__':
 
 	if args.pretrained == 0:
 		model = seg_model(2)
-		optimizer = RMSprop(lr=args.lr)
-		# optimizer = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=False)
+		if args.optimizer == 'rms':
+			optimizer = RMSprop(lr=args.lr)
+		elif args.optimizer == 'sgd':
+			optimizer = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=False)
 		model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 	else:
 		model = load_model(args.modelfile)
