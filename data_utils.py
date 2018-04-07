@@ -60,11 +60,11 @@ def get_batch(image, seg_mask, ratio=3, h=13, s=2):
 	patches, labels = [], []
 	m,n = image.shape[:2]
 	count, length = 0, len(indices_pos[0])
-	for i,ind in enumerate(indices_pos[0]):
-	# while count < 100:
-		# rand_int = randint(0, length)-1
-		# x, y = indices_pos[0][rand_int], indices_pos[1][rand_int]#
-		x,y = ind, indices_pos[1][i]
+	# for i,ind in enumerate(indices_pos[0]):
+	while count < 100:
+		rand_int = randint(0, length)-1
+		x, y = indices_pos[0][rand_int], indices_pos[1][rand_int]#
+		# x,y = ind, indices_pos[1][i]
 		if x-h-1 < 0 or y-h-1 < 0 or x+h+1 > m or y+h+1>n:
 			continue
 		else:

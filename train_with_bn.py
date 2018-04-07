@@ -1,6 +1,6 @@
 import keras
 from keras.models import Sequential, load_model
-from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, Dense, Flatten
+from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, Dense, Flatten, Activation
 from keras.losses import categorical_crossentropy
 from keras.optimizers import RMSprop, SGD
 from keras import regularizers
@@ -8,6 +8,7 @@ from logger import Logger
 
 import os, argparse
 from data_utils import *
+from keras.layers.normalization import BatchNormalization
 
 INPUT_SHAPE = (27,27,3)
 
@@ -24,40 +25,53 @@ def get_arguments():
 
 def seg_model(n_classes):
 	model = Sequential()
+
 	model.add(Conv2D(16, (3,3),
 		strides=(1, 1), padding='same',
-		use_bias=True, activation='relu',
+		use_bias=True, activation=None,
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01),
 		input_shape=INPUT_SHAPE))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
 	model.add(Conv2D(16, (3,3),
 		strides=(1, 1), padding='same',
-		use_bias=True, activation='relu',
+		use_bias=True, activation=None,
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
 
 	model.add(Conv2D(32, (3,3),
 		strides=(1, 1), padding='same',
-		use_bias=True, activation='relu',
+		use_bias=True, activation=None,
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
 	model.add(Conv2D(32, (3,3),
 		strides=(1, 1), padding='same',
-		use_bias=True, activation='relu',
+		use_bias=True, activation=None,
 		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 
 	# #Convolutional Transposes
 	# model.add(Conv2DTranspose(64, (3,3),
 	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
+	# 	use_bias=True, activation=None,
 	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	# model.add(Conv2DTranspose(32, (3,3),
 	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
+	# 	use_bias=True, activation=None,
 	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	# model.add(Conv2DTranspose(16, (3,3),
 	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation='relu',
+	# 	use_bias=True, activation=None,
 	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
 	# model.add(Conv2DTranspose(n_classes, (3,3),
 	# 	strides=(1, 1), padding='same',
@@ -66,8 +80,14 @@ def seg_model(n_classes):
 	
 	#Fully connected layers
 	model.add(Flatten())
-	model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.01)))
-	model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+	model.add(Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01)))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
+	model.add(Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01)))
+	model.add(BatchNormalization(axis=-1))
+	model.add(Activation('relu'))
+
 	model.add(Dense(25, activation='sigmoid', kernel_regularizer=regularizers.l2(0.01)))
 
 	return model
