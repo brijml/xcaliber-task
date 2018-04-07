@@ -1,6 +1,6 @@
 import keras
-from keras.models import Sequential, load_model
-from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, Dense, Flatten, Activation
+from keras.models import Sequential, load_model, Model
+from keras.layers import Conv2D, Conv2DTranspose, MaxPooling2D, Dense, Flatten, Activation, Input
 from keras.losses import categorical_crossentropy
 from keras.optimizers import RMSprop, SGD
 from keras import regularizers
@@ -9,6 +9,8 @@ from logger import Logger
 import os, argparse
 from data_utils import *
 from keras.layers.normalization import BatchNormalization
+from keras import backend as K
+K.set_learning_phase = 1
 
 INPUT_SHAPE = (27,27,3)
 
@@ -23,73 +25,51 @@ def get_arguments():
 	parser.add_argument('--epoch', type=int, default=5, help = 'number of epochs')
 	return parser.parse_args()
 
-def seg_model(n_classes):
-	model = Sequential()
+def seg_model():
 
-	model.add(Conv2D(16, (3,3),
+	inps = Input(shape = INPUT_SHAPE)
+	x = Conv2D(16, (3,3),
 		strides=(1, 1), padding='same',
 		use_bias=True, activation=None,
-		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01),
-		input_shape=INPUT_SHAPE))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
+		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01))(inps)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
 
-	model.add(Conv2D(16, (3,3),
+	x = Conv2D(16, (3,3),
 		strides=(1, 1), padding='same',
 		use_bias=True, activation=None,
-		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
+		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01))(x)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
 
-	model.add(MaxPooling2D(pool_size=(2, 2)))
+	x = MaxPooling2D(pool_size=(2, 2))(x)
 
-
-	model.add(Conv2D(32, (3,3),
+	x = Conv2D(32, (3,3),
 		strides=(1, 1), padding='same',
 		use_bias=True, activation=None,
-		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
+		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01))(x)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
 
-	model.add(Conv2D(32, (3,3),
+	x = Conv2D(32, (3,3),
 		strides=(1, 1), padding='same',
 		use_bias=True, activation=None,
-		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
+		kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01))(x)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
 
-	model.add(MaxPooling2D(pool_size=(2, 2)))
+	x = MaxPooling2D(pool_size=(2, 2))(x)
 
-	# #Convolutional Transposes
-	# model.add(Conv2DTranspose(64, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation=None,
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(32, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation=None,
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(16, (3,3),
-	# 	strides=(2, 2), padding='same',
-	# 	use_bias=True, activation=None,
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	# model.add(Conv2DTranspose(n_classes, (3,3),
-	# 	strides=(1, 1), padding='same',
-	# 	use_bias=True, activation='softmax',
-	# 	kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=regularizers.l2(0.01)))
-	
-	#Fully connected layers
-	model.add(Flatten())
-	model.add(Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01)))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
+	x = Flatten()(x)
+	x = Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01))(x)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
+	x = Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01))(x)
+	x = BatchNormalization(axis=-1)(x, training=K.learning_phase())
+	x = Activation('relu')(x)
+	y = Dense(25, activation='sigmoid', kernel_regularizer=regularizers.l2(0.01))(x)
 
-	model.add(Dense(64, activation=None, kernel_regularizer=regularizers.l2(0.01)))
-	model.add(BatchNormalization(axis=-1))
-	model.add(Activation('relu'))
-
-	model.add(Dense(25, activation='sigmoid', kernel_regularizer=regularizers.l2(0.01)))
-
+	model = Model(inputs=inps, outputs=y)
 	return model
 
 
@@ -108,7 +88,7 @@ if __name__ == '__main__':
 	logger_batch = batch_obj.log()
 
 	if args.pretrained == 0:
-		model = seg_model(2)
+		model = seg_model()
 		optimizer = RMSprop(lr=args.lr)
 		# optimizer = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=False)
 		model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
@@ -148,6 +128,6 @@ if __name__ == '__main__':
 
 		logger_batch.info('validation loss for epoch_no {} is loss:{}, accuracy:{}'.format(epoch_count, (total_loss/batch_count), accuracy))
 
-		filename = 'mymodel'+str(epoch_count)+'.h5'
+		filename = 'mymodel'+str(epoch_count)+'_bn.h5'
 		model.save(os.path.join(save_dir, filename))
 		epoch_count+=1

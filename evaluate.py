@@ -2,10 +2,12 @@ from keras.models import load_model
 from data_utils import *
 import os, argparse
 import matplotlib
-# matplotlib.use("Agg")
+matplotlib.use("Agg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import cv2
+from keras import backend as K
+K.set_learning_phase(0)
 
 def get_arguments():
 	parser = argparse.ArgumentParser(description='Necessary variables.')
@@ -76,6 +78,9 @@ if __name__ == '__main__':
 	gt_files = os.listdir(gt_path)
 	train_gt, val_gt = validation_split(gt_files, 0.2)
 	model = load_model(args.modelfile)
+	
+	for l in model.layers:
+		l.trainable = False
 
 	tot_p, tot_r, tot_f = 0, 0, 0
 	count = 0
@@ -105,8 +110,11 @@ if __name__ == '__main__':
 		out = infer(total_prediction)
 		out_norm = np.zeros_like(out)
 		out_norm = cv2.normalize(out, out_norm, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+		
+		# show(out_norm)
 		out_norm[out_norm>0.5] = 1
 		out_norm[out_norm<0.5] = 0
+		# show(out_norm)
 
 		#save the output
 		save_output(img, out_norm)
