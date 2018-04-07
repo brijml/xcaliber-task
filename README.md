@@ -28,6 +28,7 @@ This is a problem that was solved for the interview at xcaliber. The task was to
 
 ## Evaluation Results
 Both the models were trained with the same hyperparameters(i.e. equal number of epochs and learning rate) except one is trained with SGD optimizer and the other is trained with RMSProp optimizer. The model trained with RMSProp converged to the local optima faster than the one trained with SGD. An evalation can be performed with the Precision, Recall and F1 score. Calculating precision, recall and F1 score of each model,
+
 | Model | Precision | Recall | F1 score
 | ------ | ------ | ------ | ------ |
 | with SGD| 0.6793339826220599 | 0.3867762951981743 | 0.4682298709208381 |
@@ -36,18 +37,16 @@ Both the models were trained with the same hyperparameters(i.e. equal number of 
 Higher value of precision shows that the model trained with RMSProp is more accurate is detecting cracks(since false postives are lesser in prediction) but lower value for recall for model trained with RMSProp shows there are higher false negatives in prediction which is also dependant on the threshold value(0.5 from [0-1] was used for experiments).
 
 ## Sample results
-### First model(trained without batch normalisation)
-![ex1](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output1.png)
-![ex2](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output2.png)
-![ex3](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output3.png)
+### First model(trained with SGD)
+![ex1](https://github.com/brijml/xcaliber-task/blob/master/output/trained_with_sgd/098.jpg)
+![ex2](https://github.com/brijml/xcaliber-task/blob/master/output/trained_with_sgd/022.jpg)
 
-### Second model(trained with batch normalisation)
-![ex1](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output1.png)
-![ex2](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output2.png)
-![ex3](https://github.com/brijml/Object-Detection-Faster-RCNN/blob/fast_rcnn/examples/output3.png)
+### Second model(trained with RMSProp)
+![ex1](https://github.com/brijml/xcaliber-task/blob/master/output/trained_with_RMS/069.jpg)
+![ex2](https://github.com/brijml/xcaliber-task/blob/master/output/trained_with_RMS/073.jpg)
 
 
 ### Conclusion
-Training a neural network with RMSProp not only speeds up the training but also makes it smoother as compared to SGD opimizer which shows lot more oscillations in weight updates and loss values at each iteration. 
+Training a neural network with RMSProp not only speeds up the training but also makes it smoother as compared to SGD opimizer which shows lot more oscillations in weight updates and loss values at each iteration.
 ### References
 [Zhun Fan,Yuming Wu, Jiewei Lu, and Wenji Li, “Automatic Pavement Crack Detection Based on Structured Prediction with the Convolutional Neural Network,” Arxiv,2018](https://arxiv.org/pdf/1802.02208.pdf)
