@@ -2,7 +2,7 @@ from keras.models import load_model
 from data_utils import *
 import os, argparse
 import matplotlib
-matplotlib.use("Agg")
+# matplotlib.use("Agg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import cv2
@@ -79,8 +79,8 @@ if __name__ == '__main__':
 	train_gt, val_gt = validation_split(gt_files, 0.2)
 	model = load_model(args.modelfile)
 	
-	for l in model.layers:
-		l.trainable = False
+	# for l in model.layers:
+	# 	l.trainable = False
 
 	tot_p, tot_r, tot_f = 0, 0, 0
 	count = 0
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 		m,n,p = img1.shape
 		batch = get_batches(img1)
 		try:
-			a = 10000
+			a = 5000
 			total_prediction = np.zeros((batch.shape[0], 25))
 			for i in range(0,len(batch),a):
 				prediction = model.predict_on_batch(batch[i:i+a])
@@ -123,7 +123,9 @@ if __name__ == '__main__':
 		tot_r+=recall
 		tot_f+=F1
 		count+=1
+		print(tot_p, tot_r, tot_f)
 	print("average precision:{}, average_recall:{}, average_F1_score{}".format(tot_p/count, tot_r/count, tot_f/count))
 
-#One of the evaluation results
-#average precision:0.7090938669172043, average_recall:0.3816260797933057, average_F1_score:0.477022617
+#Evaluation results for two models.
+#average precision:0.7076627951050088, average_recall:0.35894027909052256, average_F1_score0.4610767084769732
+#average precision:0.6793339826220599, average_recall:0.3867762951981743, average_F1_score0.4682298709208381

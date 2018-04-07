@@ -13,7 +13,7 @@ from keras import backend as K
 K.set_learning_phase = 1
 
 INPUT_SHAPE = (27,27,3)
-
+	
 def get_arguments():
 	parser = argparse.ArgumentParser(description='Necessary variables.')
 	parser.add_argument('--basepath', type=str, default=1, help = 'path to the dataset directory')

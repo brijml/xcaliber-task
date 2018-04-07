@@ -27,11 +27,13 @@ This is a problem that was solved for the interview at xcaliber. The task was to
     where the basepath is the path to dataset.
 
 ## Evaluation Results
-Both the models were trained with the same hyperparameters except one was trained with batch normalization. The model trained with batch normalisation converged to the local optima at the third epoch whereas it took ten epochs for the model trained without batch normalization. Calculating precision, recall and F1 score of each model,
+Both the models were trained with the same hyperparameters(i.e. equal number of epochs and learning rate) except one is trained with SGD optimizer and the other is trained with RMSProp optimizer. The model trained with RMSProp converged to the local optima faster than the one trained with SGD. An evalation can be performed with the Precision, Recall and F1 score. Calculating precision, recall and F1 score of each model,
 | Model | Precision | Recall | F1 score
 | ------ | ------ | ------ | ------ |
-| without BatchNorm | 0.7090938669172043 | 0.3816260797933057 | 0.477022617 |
-| with BatchNorm |  |
+| with SGD| 0.6793339826220599 | 0.3867762951981743 | 0.4682298709208381 |
+| with RMSProp | 0.7495153476508604 | 0.35647028274681797 | 0.46470270101566924 |
+
+Higher value of precision shows that the model trained with RMSProp is more accurate is detecting cracks(since false postives are lesser in prediction) but lower value for recall for model trained with RMSProp shows there are higher false negatives in prediction which is also dependant on the threshold value(0.5 from [0-1] was used for experiments).
 
 ## Sample results
 ### First model(trained without batch normalisation)
@@ -46,6 +48,6 @@ Both the models were trained with the same hyperparameters except one was traine
 
 
 ### Conclusion
-Training a neural network with batch normalisation layers not only speeds up the training but also makes it smoother. 
+Training a neural network with RMSProp not only speeds up the training but also makes it smoother as compared to SGD opimizer which shows lot more oscillations in weight updates and loss values at each iteration. 
 ### References
 [Zhun Fan,Yuming Wu, Jiewei Lu, and Wenji Li, “Automatic Pavement Crack Detection Based on Structured Prediction with the Convolutional Neural Network,” Arxiv,2018](https://arxiv.org/pdf/1802.02208.pdf)

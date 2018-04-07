@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io as sio
 import os
 import matplotlib
-matplotlib.use("Agg")
+# matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from random import shuffle, randint
