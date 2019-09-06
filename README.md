@@ -49,7 +49,7 @@ Higher value of precision shows that the model trained with RMSProp is more accu
 ![ex2](https://github.com/brijml/xcaliber-task/blob/master/output/trained_with_RMS/073.jpg)
 
 
-### Conclusion
+### Observation
 Training a neural network with RMSProp not only speeds up the training but also makes it smoother as compared to SGD opimizer which shows lot more oscillations in weight updates and loss values at each iteration.
 ### References
 [Zhun Fan,Yuming Wu, Jiewei Lu, and Wenji Li, “Automatic Pavement Crack Detection Based on Structured Prediction with the Convolutional Neural Network,” Arxiv,2018](https://arxiv.org/pdf/1802.02208.pdf)
